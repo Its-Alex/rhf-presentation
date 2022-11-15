@@ -4,7 +4,7 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<title>reveal.js</title>
+		<title>React hook form - Spacefill</title>
 
 		<link rel="stylesheet" href="dist/reset.css">
 		<link rel="stylesheet" href="dist/reveal.css">
@@ -16,16 +16,192 @@
 	<body>
 		<div class="reveal">
 			<div class="slides">
-				<section>Slide 1</section>
-				<section>Slide 2
-						<aside class="notes">
-						<p>Some notes</p>
-						</aside>
-						<p>Some slide text</p>
-						<aside class="notes">
-						<p>and some more notes</p>
-					</aside>
-				</section>
+				<section data-markdown>
+                    <textarea data-template>
+                        ## [React hook form](https://react-hook-form.com/)
+                        ### à Spacefill
+                        ---
+                        ## Pourquoi ?
+                        ---
+                        Parce que Formik  
+                        <img src="./stan-hell-no.png" alt="stan-hell-no" width="400" />
+                        ---
+                        - Performance (principalement)
+                        - Meilleur documentation
+                        - API Simplifiée
+                        Notes:
+                        https://react-hook-form.com/faqs#PerformanceofReactHookForm
+                        ---
+                        ## Comment ?
+
+                        https://gitlab.spacefill.fr/groups/spacefill/-/epics/156
+                        ---
+                        ## Prérequis
+                        ---
+                        - [useEffect](https://fr.reactjs.org/docs/hooks-effect.html)
+                        - [hooks custom](https://reactjs.org/docs/hooks-custom.html)
+
+
+                        Quelques liens utiles:
+
+
+                        - [Synchronizing with Effects](https://beta-reactjs-org-git-you-might-not-fbopensource.vercel.app/learn/synchronizing-with-effects)
+                        - [You Might Not Need an Effect](https://beta-reactjs-org-git-you-might-not-fbopensource.vercel.app/learn/you-might-not-need-an-effect)
+                        ---
+                        ## Tour rapide
+
+                        - useForm <!-- .element: class="fragment fade-up" data-fragment-index="1" -->  
+                        - useController <!-- .element: class="fragment fade-up" data-fragment-index="2" -->  
+                        - useFormContext <!-- .element: class="fragment fade-up" data-fragment-index="3" -->  
+                        - useWatch <!-- .element: class="fragment fade-up" data-fragment-index="4" -->  
+                        - useFormState <!-- .element: class="fragment fade-up" data-fragment-index="5" -->  
+                        - useFieldArray <!-- .element: class="fragment fade-up" data-fragment-index="6" -->  
+                        Notes:
+                        https://react-hook-form.com/api
+                        ---
+                        ## Pratiques
+
+                        - Valeurs par défauts
+                        - Watch
+                        ---
+                        ## Valeurs par défauts
+                        ---
+                        ```jsx []
+                        function App() {
+                            const { data = {} } = useFetch("https://yesno.wtf/api/", {}, []);
+                            const { register, watch } = useForm({
+                                defaultValues: {
+                                    apiResponse: data?.answer
+                                }
+                            });
+                            console.log(watch());
+                            console.log(data?.answer);
+                        }
+                        ```
+                        ## Bad ❌ <!-- .element: class="fragment" data-fragment-index="1" -->  
+                        - {apiResponse: ""} <!-- .element: class="fragment" data-fragment-index="1" -->  
+                        - yes <!-- .element: class="fragment" data-fragment-index="1" -->  
+                        Notes:
+                        Codepen: https://codesandbox.io/s/react-hook-form-default-values-not-working-t8f9ls?file=/src/index.js
+                        ---
+                        ```jsx [9-13]
+                        function App() {
+                            const { data = {} } = useFetch("https://yesno.wtf/api/", {}, []);
+                            const { register, watch, reset } = useForm({
+                                defaultValues: {
+                                    apiResponse: ""
+                                }
+                            });
+                          
+                            useEffect(() => {
+                                reset({
+                                    apiResponse: data?.answer
+                                });
+                            }, [data, reset]);
+                          
+                            console.log(watch());
+                            console.log(data?.answer);
+                        }
+                        ```
+                        ## Good ✅
+                        - {apiResponse: "yes"}
+                        - yes
+                        Notes:
+                        Codepen: https://codesandbox.io/s/react-hook-form-default-values-working-wsxh51?file=/src/index.js
+
+                        Lien du problème dans les issues de ReactHookForm: https://github.com/react-hook-form/react-hook-form/issues/1307
+
+                        Pourquoi on utilise `reset` et pas `setValue` ? Pour permettre au state du formulaire de repartir de 0
+                        ---
+                        ## Watch
+                        ---
+                        ## API
+                        
+                        - [useForm/watch](https://react-hook-form.com/api/useform/watch)
+                        - [useWatch](https://react-hook-form.com/api/usewatch)
+                        ---
+                        ## Différences
+
+                        - https://codesandbox.io/s/react-hook-form-useform-watch-example-q6yy2x?file=/src/index.js
+                        - https://codesandbox.io/s/react-hook-form-usewatch-example-1e259v?file=/src/index.js
+                        ---
+                        ## watch vs getValues
+
+                        - `watch` => re-render du composant React
+                        - `getValues` => récupération de la valeur dans le state de React hook form
+                        ---
+                        ```jsx []
+                        function App() {
+                            const [inputsSentence, setInputsSentence] = useState("");
+                            const { register, watch, ...methods } = useForm({
+                                defaultValues: {
+                                    input1: ""
+                                }
+                            });
+
+                            const input1Value = watch("input1");
+
+                            return (
+                                <FormProvider register={register} watch={watch} {...methods}>
+                                    <form>
+                                        <input {...register("input1")} />
+                                        <input
+                                        onChange={(e) => {
+                                            e.persist();
+                                            setInputsSentence(`${input1Value} ${e?.target?.value}`);
+                                        }}
+                                        />
+                                        Sentence: {inputsSentence}
+                                        <input type="submit" />
+                                    </form>
+                                </FormProvider>
+                            );
+                        }
+                        ```
+                        ## Bad ❌ <!-- .element: class="fragment" data-fragment-index="1" -->  
+                        Re-render du composant inutile alors qu'on veut juste récupérer la valeur durant une action utilisateur <!-- .element: class="fragment" data-fragment-index="1" -->  
+                        Notes:
+                        https://codesandbox.io/s/react-hook-form-watch-bad-use-s2t101?file=/src/index.js
+                        ---
+                        ```jsx [16]
+                        function App() {
+                            const [inputsSentence, setInputsSentence] = useState("");
+                            const { register, getValues, ...methods } = useForm({
+                                defaultValues: {
+                                    input1: ""
+                                }
+                            });
+                          
+                            return (
+                                <FormProvider register={register} getValues={getValues} {...methods}>
+                                    <form>
+                                        <input {...register("input1")} />
+                                        <input
+                                            onChange={(e) => {
+                                            e.persist();
+                                            setInputsSentence(`${getValues("input1")} ${e?.target?.value}`);
+                                            }}
+                                        />
+                                        Sentence: {inputsSentence}
+                                        <input type="submit" />
+                                    </form>
+                                </FormProvider>
+                            );
+                        }
+                        ```
+                        ## Good ✅
+                        Pas de re-render du composant, on utilise uniquement la valeur du state
+                        Notes:
+                        https://codesandbox.io/s/react-hook-form-getvalues-good-use-forked-ejdzul?file=/src/index.js
+                        ---
+                        ## Remerciement
+
+                        Merci a Stanley Serbin qui s'est engagé à écrire une
+                        documentation pour le repo suite a cette présentation
+
+                        <img src="./stan-of-course.jpg" alt="stan-of-course" width="300"/>
+                    </textarea>
+                </section>
 			</div>
 		</div>
 
@@ -38,10 +214,12 @@
 			// - https://revealjs.com/initialization/
 			// - https://revealjs.com/config/
 			Reveal.initialize({
-				hash: true,
+                hash: true,
 
 				// Learn about plugins: https://revealjs.com/plugins/
-				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
+				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ],
+                // showNotes: true
+                slideNumber: 'c/t'
 			});
 		</script>
 	</body>

@@ -232,6 +232,8 @@ html * {
   overflow: auto;
   max-height: 400px;
   word-wrap: normal;
+  font-size: 0.95rem;
+  line-height: 0.95rem;
 }
 
 .reveal .code-wrapper {

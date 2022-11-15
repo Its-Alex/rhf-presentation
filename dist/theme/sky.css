@@ -239,6 +239,8 @@ section.has-dark-background, section.has-dark-background h1, section.has-dark-ba
   overflow: auto;
   max-height: 400px;
   word-wrap: normal;
+  font-size: 0.95rem;
+  line-height: 0.95rem;
 }
 
 .reveal .code-wrapper {
